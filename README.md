@@ -6,10 +6,9 @@ This repository is an exploratory, artifact-backed research package.
 It is designed for conservative claim auditing, not for a full benchmark rerun from raw logs.
 
 ## DOI
-[![Version DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18847306.svg)](https://doi.org/10.5281/zenodo.18847306)
-[![Concept DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18847305.svg)](https://doi.org/10.5281/zenodo.18847305)
+Standalone Zenodo DOI for release `v0.2.0` is pending publication.
 
-Version DOI references the exact `v0.1.0` archived artifact; Concept DOI is the umbrella identifier across versions.
+Legacy note: monorepo DOI `10.5281/zenodo.18847306` (published on 2026-03-03) is superseded by this standalone repository release line.
 
 ## Research Focus
 This project studies a geometric boundary on the Gaussian hill surface and whether a phase-aware damping rule is associated with improved robustness under noisy optimization conditions in the bundled report artifacts.

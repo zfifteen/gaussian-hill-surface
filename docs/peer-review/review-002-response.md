@@ -61,7 +61,7 @@ Status: Acknowledged (release-time gate)
 Policy for this branch:
 - Keep `main` URLs until `v0.1.0` tag exists.
 - At release cut, switch to:
-  - `https://github.com/zfifteen/research/tree/v0.1.0/gaussian-hill-surface`
+  - `https://github.com/zfifteen/gaussian-hill-surface/tree/v0.2.0`
 - Rerun `bash scripts/qc_check.sh` after URL update.
 
 Files:

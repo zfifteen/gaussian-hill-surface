@@ -4,6 +4,5 @@
 
 It summarizes scope, method, reported evidence, limitations, and reproducibility using only repository-backed artifacts.
 
-Published DOI references: Version DOI https://doi.org/10.5281/zenodo.18847306, Concept DOI https://doi.org/10.5281/zenodo.18847305.
-
-Published DOI references: Version DOI https://doi.org/10.5281/zenodo.18847306, Concept DOI https://doi.org/10.5281/zenodo.18847305.
+Standalone DOI references for `v0.2.0` are pending publication.
+Legacy monorepo DOI `10.5281/zenodo.18847306` is superseded.

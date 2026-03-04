@@ -3,9 +3,10 @@
 ## Abstract
 This note evaluates whether a phase-aware update rule at the Gaussian curvature boundary (`r = sigma`) is associated with better optimization outcomes under noisy conditions in the bundled benchmark report artifacts. The release is exploratory and artifact-backed: it includes report-derived result tables, hash verification, and claim recomputation checks, but it does not include seed-level raw logs or a full from-scratch rerun pipeline.
 
-Published DOI references:
-- Version DOI: [10.5281/zenodo.18847306](https://doi.org/10.5281/zenodo.18847306)
-- Concept DOI: [10.5281/zenodo.18847305](https://doi.org/10.5281/zenodo.18847305)
+DOI status for this standalone repository release line:
+- Version DOI: pending publication for `v0.2.0`
+- Concept DOI: pending publication for this standalone repository
+- Legacy superseded DOI (monorepo): `10.5281/zenodo.18847306`
 
 ## 1. Research Question and Scope
 ### 1.1 Research Question

@@ -38,6 +38,7 @@ Command: bash scripts/qc_check.sh
 - path: docs/technical-note/technical_note.md
 
 ## DOI
-Release Version: v0.1.0
-Version DOI: 10.5281/zenodo.18847306
-Concept DOI: 10.5281/zenodo.18847305
+Release Version: v0.2.0
+Version DOI: PENDING_STANDALONE_PUBLICATION
+Concept DOI: PENDING_STANDALONE_PUBLICATION
+Superseded Legacy DOI: 10.5281/zenodo.18847306
