@@ -1,5 +1,12 @@
 # Gaussian Hill Surface
 
+## DOI
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18856931.svg)](https://doi.org/10.5281/zenodo.18856931)
+
+- Version DOI (`v0.2.0`): `10.5281/zenodo.18856931`
+- Concept DOI (all versions): `10.5281/zenodo.18856930`
+
 ## The Thesis
 
 The 1σ boundary is not merely descriptive statistics. It is an algorithmic control surface.

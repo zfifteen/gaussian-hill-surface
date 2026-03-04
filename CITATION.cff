@@ -6,6 +6,8 @@ authors:
   - family-names: "Lopez"
     given-names: "Dionisio Alberto"
 repository-code: "https://github.com/zfifteen/gaussian-hill-surface"
+doi: "10.5281/zenodo.18856931"
+url: "https://doi.org/10.5281/zenodo.18856931"
 license: "MIT"
 version: "0.2.0"
 date-released: "2026-03-04"

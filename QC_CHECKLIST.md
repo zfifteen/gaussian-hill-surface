@@ -39,6 +39,6 @@ Command: bash scripts/qc_check.sh
 
 ## DOI
 Release Version: v0.2.0
-Version DOI: PENDING_STANDALONE_PUBLICATION
-Concept DOI: PENDING_STANDALONE_PUBLICATION
+Version DOI: 10.5281/zenodo.18856931
+Concept DOI: 10.5281/zenodo.18856930
 Superseded Legacy DOI: 10.5281/zenodo.18847306
