@@ -1,5 +1,5 @@
 {
-  "title": "Gaussian Hill Surface / PhaseWall",
+  "title": "Gaussian Hill Surface",
   "description": "Exploratory, artifact-backed research package for Gaussian curvature boundary analysis and report-derived benchmark evidence.",
   "upload_type": "software",
   "license": "MIT",
@@ -12,7 +12,7 @@
     "gaussian-curvature",
     "optimization",
     "cma-es",
-    "phasewall",
+    "gaussian-hill-surface",
     "reproducibility"
   ],
   "related_identifiers": [
