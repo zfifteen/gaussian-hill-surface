@@ -3,6 +3,9 @@
 ## Goal
 Build a reproducible rerun pipeline that addresses peer-review concerns around metric interpretation, inferential robustness, comparator completeness, and hyperparameter governance.
 
+Canonical algorithm specification:
+- `docs/analysis/lr_adapt_proxy_technical_spec.md`
+
 ## Methods
 - `vanilla_cma`
 - `lr_adapt_proxy`
