@@ -10,6 +10,8 @@ Primary reading path:
 1. `../README.md`
 2. `technical-note/technical_note.md`
 3. `analysis/benchmarks.md`
-4. `release-notes/v0.1.0-conservative-doi-draft.md`
+4. `analysis/rerun_protocol.md`
+5. `analysis/rerun_smoke_report.md`
+6. `release-notes/v0.1.0-conservative-doi-draft.md`
 
 Product-oriented implementation docs and peer/product review materials are maintained in the separate `phasewall` repository.

@@ -1,7 +1,7 @@
 # PhaseWall at the Gaussian Curvature Boundary: An Exploratory Technical Note
 
 ## Abstract
-This note evaluates whether a phase-aware update rule at the Gaussian curvature boundary (`r = sigma`) is associated with better optimization outcomes under noisy conditions in the bundled benchmark report artifacts. The release is exploratory and artifact-backed: it includes report-derived result tables, hash verification, and claim recomputation checks, but it does not include seed-level raw logs or a full from-scratch rerun pipeline.
+This note evaluates whether a phase-aware update rule at the Gaussian curvature boundary ($r = \sigma$) is associated with better optimization outcomes under noisy conditions in the bundled benchmark report artifacts. The release is exploratory and artifact-backed: it includes report-derived result tables, hash verification, and claim recomputation checks, but it does not include seed-level raw logs or a full from-scratch rerun pipeline.
 
 DOI status for this standalone repository release line:
 - Version DOI (`v0.2.0`): `10.5281/zenodo.18856931`
@@ -10,7 +10,7 @@ DOI status for this standalone repository release line:
 
 ## 1. Research Question and Scope
 ### 1.1 Research Question
-Can a phase-aware damping rule at the Gaussian curvature transition (`r = sigma`) improve robustness and sample efficiency relative to a vanilla baseline under the reported noisy benchmark conditions?
+Can a phase-aware damping rule at the Gaussian curvature transition ($r = \sigma$) improve robustness and sample efficiency relative to a vanilla baseline under the reported noisy benchmark conditions?
 
 ### 1.2 Scope Boundaries
 In scope:
@@ -26,11 +26,11 @@ Out of scope:
 ### 2.1 Radius Definitions
 Isotropic normalized radius:
 
-`r = ||x - mu|| / sigma`
+$$r = \lVert x - \mu \rVert / \sigma$$
 
 Anisotropic extension (Mahalanobis radius):
 
-`r = sqrt((x - mu)^T Sigma^-1 (x - mu))`
+$$r = \sqrt{(x - \mu)^T \Sigma^{-1} (x - \mu)}$$
 
 ### 2.2 Baseline and Variant
 Baseline in this note: Vanilla CMA-ES as defined in the bundled report (`artifacts/reports/PhaseWall_Benchmark_Report.pdf`) under the same evaluation budget, noise model, and seed count.
@@ -97,42 +97,42 @@ The current artifact-backed evidence supports an exploratory claim: phase-aware 
 ## Appendix A: Curvature Sign Derivation for the Gaussian Hill
 Let
 
-`z(x, y) = exp(-(x^2 + y^2) / (2 sigma^2))`
+$$z(x, y) = \exp\left(-(x^2 + y^2) / (2 \sigma^2)\right)$$
 
-and `r^2 = x^2 + y^2`.
+and $r^2 = x^2 + y^2$.
 
-For a graph surface `z = f(x, y)`, Gaussian curvature is:
+For a graph surface $z = f(x, y)$, Gaussian curvature is:
 
-`K = (f_xx f_yy - f_xy^2) / (1 + f_x^2 + f_y^2)^2`
+$$K = (f_{xx} f_{yy} - f_{xy}^2) / (1 + f_x^2 + f_y^2)^2$$
 
-For this `z(x, y)`:
+For this $z(x, y)$:
 
-`z_x = -(x / sigma^2) z`
+$$z_x = -(x / \sigma^2) z$$
 
-`z_y = -(y / sigma^2) z`
+$$z_y = -(y / \sigma^2) z$$
 
-`z_xx = ((x^2 - sigma^2) / sigma^4) z`
+$$z_{xx} = ((x^2 - \sigma^2) / \sigma^4) z$$
 
-`z_yy = ((y^2 - sigma^2) / sigma^4) z`
+$$z_{yy} = ((y^2 - \sigma^2) / \sigma^4) z$$
 
-`z_xy = (xy / sigma^4) z`
+$$z_{xy} = (xy / \sigma^4) z$$
 
 Compute the numerator:
 
-`z_xx z_yy - z_xy^2`
+$$z_{xx} z_{yy} - z_{xy}^2$$
 
-`= (z^2 / sigma^8) [ (x^2 - sigma^2)(y^2 - sigma^2) - x^2 y^2 ]`
+$$= (z^2 / \sigma^8)\left[(x^2 - \sigma^2)(y^2 - \sigma^2) - x^2 y^2\right]$$
 
-`= (z^2 / sigma^8) [ sigma^4 - sigma^2 (x^2 + y^2) ]`
+$$= (z^2 / \sigma^8)\left[\sigma^4 - \sigma^2 (x^2 + y^2)\right]$$
 
-`= (z^2 / sigma^6) (sigma^2 - r^2)`
+$$= (z^2 / \sigma^6)(\sigma^2 - r^2)$$
 
-The denominator `(1 + z_x^2 + z_y^2)^2` is strictly positive, so the sign of `K` is the sign of `(sigma^2 - r^2)`:
-- `r < sigma` -> `K > 0`
-- `r = sigma` -> `K = 0`
-- `r > sigma` -> `K < 0`
+The denominator $(1 + z_x^2 + z_y^2)^2$ is strictly positive, so the sign of $K$ is the sign of $(\sigma^2 - r^2)$:
+- $r < \sigma$ -> $K > 0$
+- $r = \sigma$ -> $K = 0$
+- $r > \sigma$ -> $K < 0$
 
-Therefore, the curvature sign change occurs exactly at `r = sigma`.
+Therefore, the curvature sign change occurs exactly at $r = \sigma$.
 
 ## References
 1. `artifacts/reports/PhaseWall_Benchmark_Report.pdf`
