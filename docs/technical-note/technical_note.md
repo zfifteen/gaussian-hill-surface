@@ -1,7 +1,9 @@
 # PhaseWall at the Gaussian Curvature Boundary: An Exploratory Technical Note
 
 ## Abstract
-This note evaluates whether a phase-aware update rule at the Gaussian curvature boundary ($r = \sigma$) is associated with better optimization outcomes under noisy conditions in the bundled benchmark report artifacts. The release is exploratory and artifact-backed: it includes report-derived result tables, hash verification, and claim recomputation checks, but it does not include seed-level raw logs or a full from-scratch rerun pipeline.
+This note evaluates whether a phase-aware damping rule at the Gaussian curvature boundary ($r = \sigma$) is associated with better outcomes under noisy conditions. The evidence base now includes both a historical report-derived table and a new rerun pipeline with stricter statistical controls.
+
+This revision addresses prior methodological concerns by using sign-robust effect metrics, two-sided paired tests, and multiple-comparison correction in the rerun analysis. Under the high-rigor rerun, `phasewall_tuned` is near-neutral in aggregate (2/36 cells with `q < 0.05`), while `lr_adapt_proxy` and `phasewall_plus_lr_tuned` show the strongest aggregate signals (34/36 and 33/36 cells with `q < 0.05`). The combined variant's gains are not cleanly decomposed into LR-proxy-only versus incremental PhaseWall contribution in this study.
 
 DOI status for this standalone repository release line:
 - Version DOI (`v0.2.0`): `10.5281/zenodo.18856931`
@@ -10,17 +12,18 @@ DOI status for this standalone repository release line:
 
 ## 1. Research Question and Scope
 ### 1.1 Research Question
-Can a phase-aware damping rule at the Gaussian curvature transition ($r = \sigma$) improve robustness and sample efficiency relative to a vanilla baseline under the reported noisy benchmark conditions?
+Can a phase-aware damping rule at the Gaussian curvature transition ($r = \sigma$) improve robustness and sample efficiency relative to a vanilla CMA-ES baseline under noisy benchmark conditions?
 
 ### 1.2 Scope Boundaries
 In scope:
 - Geometric boundary claim for the Gaussian graph surface.
-- Benchmark claims that can be traced to bundled report-derived artifacts.
+- Rerun-derived benchmark claims under repository-defined protocol and artifacts.
+- Historical report-derived results retained as context.
 
 Out of scope:
 - Universal claims across optimizers, tasks, or noise regimes.
 - Production-readiness claims.
-- New empirical claims from unbundled experiments.
+- Claiming exact reproduction of external LR-Adapt implementations (proxy caveat applies).
 
 ## 2. Method Definition
 ### 2.1 Radius Definitions
@@ -32,67 +35,112 @@ Anisotropic extension (Mahalanobis radius):
 
 $$r = \sqrt{(x - \mu)^T \Sigma^{-1} (x - \mu)}$$
 
-### 2.2 Baseline and Variant
-Baseline in this note: Vanilla CMA-ES as defined in the bundled report (`artifacts/reports/PhaseWall_Benchmark_Report.pdf`) under the same evaluation budget, noise model, and seed count.
+### 2.2 Methods Compared in Rerun Pipeline
+- `vanilla_cma`: pycma baseline.
+- `lr_adapt_proxy`: explicit repository-local sigma adaptation proxy.
+- `pop4x`: pycma with 4x population size.
+- `phasewall_tuned`: PhaseWall with tuned strength `s`.
+- `phasewall_plus_lr_tuned`: PhaseWall + LR proxy with tuned strength `s`.
 
-Variant in this note: PhaseWall (s=0.4), which applies soft radial damping in whitened z-space for samples outside the phase-wall radius.
+For the high-rigor run documented here, tuned strengths selected by disjoint tune/eval protocol were:
+- `phasewall_tuned`: `s = 0.4`
+- `phasewall_plus_lr_tuned`: `s = 0.1`
 
-Reported comparator set in the source report also includes LR-Adapt, 4x Population, and PW 0.4 + LR-Adapt.
+## 3. Experimental Protocol (Rerun-Derived)
+Run identity:
+- Run ID: `20260305T002116Z-6ae43213`
+- Scope: `high_rigor_rerun_pipeline`
+- Config: `experiments/config/high_rigor.yaml`
 
-## 3. Experimental Protocol (Report-Derived)
-The benchmark protocol used for the reported evidence is:
-- Functions: Sphere, Rosenbrock, Rastrigin, Ellipsoid
-- Dimensions: 10, 20
-- Seeds: 20 independent seeds per configuration
-- Budget: 1,000 function evaluations per run
-- Noise model: additive Gaussian noise with sigma = 0.1
-- Metric: median final best value at fixed budget (lower is better)
-- Statistical test: one-sided Wilcoxon signed-rank test (as reported)
+Matrix:
+- Functions: Sphere, Rosenbrock, Rastrigin, Ellipsoid (`cond=1e6`)
+- Dimensions: 10, 20, 40
+- Noise levels: `sigma_noise in {0.0, 0.1, 0.2}`
 
-Machine-auditable artifacts in this repository:
-- `artifacts/results/phasewall_report_table.csv`
-- `artifacts/results/phasewall_vs_vanilla_claims.csv`
-- `artifacts/SHA256SUMS`
+Execution protocol:
+- Initial mean: `[3, 3, ..., 3]`
+- Initial sigma: `2.0`
+- Evaluation budget: `1,000` function evaluations per run
+- Tuning seeds: `40`
+- Evaluation seeds: `100`
+- Tune/eval seeds are disjoint.
 
-## 4. Results (Canonical Claims)
-The canonical narrative compares Vanilla CMA-ES and PhaseWall (s=0.4) using `artifacts/results/phasewall_vs_vanilla_claims.csv`.
+Tune-then-evaluate policy:
+- Candidate strengths: `s in {0.1, 0.2, 0.4, 0.6, 0.8}`
+- Tuning task subset: all functions, dimensions `{10,20}`, noise `{0.1}`
+- Selection rule: minimize global median paired delta `(method - vanilla)`; tie-break by win-rate, then smaller `s`.
 
-| Function | Dim | Vanilla Median | PhaseWall Median | ratio_vs_vanilla | improvement_factor | p_value |
-|---|---:|---:|---:|---:|---:|---:|
-| Sphere | 10 | -0.2133 | -0.1925 | 0.902485 | 1.108052 | 0.9836 |
-| Sphere | 20 | -0.0913 | -0.0656 | 0.718510 | 1.391768 | 0.7625 |
-| Rosenbrock | 10 | 8.52 | 8.47 | 0.994131 | 1.005903 | 0.5364 |
-| Rosenbrock | 20 | 91.93 | 32.44 | 0.352877 | 2.833847 | 0.0120 |
-| Rastrigin | 10 | 22.78 | 35.78 | 1.570676 | 0.636669 | 0.8058 |
-| Rastrigin | 20 | 144.3 | 141.8 | 0.982675 | 1.017630 | 0.3781 |
-| Ellipsoid | 10 | 1466.6 | 1788.4 | 1.219419 | 0.820063 | 0.7021 |
-| Ellipsoid | 20 | 63294.2 | 101988 | 1.611332 | 0.620604 | 0.8847 |
+Primary statistics:
+- Primary effect metric: `median_delta_vs_vanilla = median(method_final_best - vanilla_final_best)` (negative is better).
+- Directional robustness: paired win/loss rates vs vanilla.
+- Significance: two-sided Wilcoxon signed-rank test.
+- Multiplicity: Benjamini-Hochberg FDR correction (`q` values) across method-cell tests.
 
 Interpretation note:
-- `ratio_vs_vanilla < 1.0` indicates lower median final objective for PhaseWall on that problem.
-- The table shows mixed outcomes across function families, including improvements on some settings and degradations on others.
+- Ratio fields are treated as non-primary descriptors only.
+- This avoids sign-inversion ambiguity when objective values can cross zero (e.g., noisy Sphere values can be negative due to additive noise).
+
+## 4. Results (High-Rigor Rerun)
+Execution integrity:
+- Total run jobs: `21,520`
+- Status: `21,520` ok, `0` failed
+- Eval-phase jobs: `18,000`
+
+Method-level aggregate summary (`36` cells per non-vanilla method):
+
+| Method | median_of_cell_median_delta | mean_win_rate | cells_q_lt_0.05 | best_q_value |
+|---|---:|---:|---:|---:|
+| lr_adapt_proxy | -18.872089 | 0.505000 | 34 | 1.919845e-17 |
+| phasewall_plus_lr_tuned | -18.836873 | 0.507778 | 33 | 1.919845e-17 |
+| phasewall_tuned | -0.078369 | 0.506111 | 2 | 5.745819e-04 |
+| pop4x | 58.695449 | 0.079722 | 36 | 1.919845e-17 |
+
+Interpretation:
+- `phasewall_tuned` is near-neutral-to-slightly-better in aggregate (`median_of_cell_median_delta = -0.078369`) and mixed across cells (21/36 cells with negative median delta).
+- `lr_adapt_proxy` is the dominant observed driver in this matrix (`median_of_cell_median_delta = -18.872089`, 34/36 cells with `q < 0.05`).
+- `phasewall_plus_lr_tuned` performs similarly to `lr_adapt_proxy` in aggregate under this protocol (33/36 cells with `q < 0.05`).
+- Current evidence does not isolate an incremental PhaseWall benefit when added on top of LR-proxy.
+- `pop4x` degrades strongly relative to vanilla in this fixed-budget setting.
+
+This pattern supports a nuanced exploratory conclusion: PhaseWall-only evidence is weak in this run, while LR-proxy-containing variants carry the strongest aggregate signals.
 
 ## 5. Reproducibility and Integrity Checks
-Repository QC command:
+Primary command used for this run:
 
 ```bash
-bash scripts/qc_check.sh
+bash scripts/run_high_rigor_pipeline.sh --workers 8
 ```
 
-This command verifies:
-- Presence and structure of release-facing metadata/docs.
-- Hash integrity for canonical artifacts listed in `artifacts/SHA256SUMS`.
-- Numerical consistency of claim metrics in `phasewall_vs_vanilla_claims.csv` by recomputing
-  `improvement_factor = vanilla_median / phasewall_median` and
-  `ratio_vs_vanilla = phasewall_median / vanilla_median`.
+This command produces run-scoped artifacts under:
+`artifacts/runs/high-rigor/<run_id>/`
+
+Key machine-auditable artifacts for this run:
+- `artifacts/runs/high-rigor/20260305T002116Z-6ae43213/results/runs_long.csv`
+- `artifacts/runs/high-rigor/20260305T002116Z-6ae43213/results/cell_stats.csv`
+- `artifacts/runs/high-rigor/20260305T002116Z-6ae43213/results/method_aggregate.csv`
+- `artifacts/runs/high-rigor/20260305T002116Z-6ae43213/results/manifest.json`
+- `artifacts/runs/high-rigor/20260305T002116Z-6ae43213/results/analysis_manifest.json`
+- `artifacts/runs/high-rigor/20260305T002116Z-6ae43213/results/findings.json`
+- `artifacts/runs/high-rigor/20260305T002116Z-6ae43213/results/findings.md`
+
+Artifact verification command:
+
+```bash
+python3 scripts/verify_rerun_artifacts.py \
+  --results-dir artifacts/runs/high-rigor/20260305T002116Z-6ae43213/results \
+  --figdir artifacts/runs/high-rigor/20260305T002116Z-6ae43213/figures \
+  --config experiments/config/high_rigor.yaml
+```
 
 ## 6. Limitations
-- Evidence is report-derived rather than regenerated from seed-level logs.
-- No full rerun pipeline is included in this release.
-- Conclusions are limited to the bundled benchmark protocol and should not be generalized beyond it.
+- `lr_adapt_proxy` is a transparent proxy, not an exact reproduction of external LR-Adapt implementations.
+- Results are from one run configuration and should not be interpreted as universal across all possible settings.
+- Tune/eval separation is enforced by disjoint seeds and task subset, but broader external validation is still needed.
+- The tuning subset overlaps evaluation function families and one evaluation noise level (`sigma_noise = 0.1`), so some task-level leakage risk remains despite seed disjointness.
+- The geometric argument motivates the damping rule but does not by itself prove causal optimality on arbitrary objective families.
 
 ## 7. Conclusion
-The current artifact-backed evidence supports an exploratory claim: phase-aware damping at the Gaussian boundary is associated with better median final objective on some reported noisy settings (notably Rosenbrock 20D), while it is neutral or worse on others. This package is framed as a conservative evidence release, not a universal performance claim.
+The curvature-sign claim at $r = \sigma$ remains mathematically exact (Appendix A). Under the new high-rigor rerun protocol with stronger statistical controls, the empirical picture is mixed but clearer: `phasewall_tuned` is near-neutral in aggregate, and the strongest aggregate signals are carried by `lr_adapt_proxy` and `phasewall_plus_lr_tuned`. Because the combined variant includes the LR proxy and this study does not provide ablation-level decomposition, incremental PhaseWall contribution on top of LR-proxy is not resolved here. These results support continued exploratory investigation, not a universal performance claim.
 
 ## Appendix A: Curvature Sign Derivation for the Gaussian Hill
 Let
@@ -135,7 +183,8 @@ The denominator $(1 + z_x^2 + z_y^2)^2$ is strictly positive, so the sign of $K$
 Therefore, the curvature sign change occurs exactly at $r = \sigma$.
 
 ## References
-1. `artifacts/reports/PhaseWall_Benchmark_Report.pdf`
-2. `artifacts/results/phasewall_report_table.csv`
-3. `artifacts/results/phasewall_vs_vanilla_claims.csv`
-4. `scripts/qc_check.sh`
+1. `artifacts/runs/high-rigor/20260305T002116Z-6ae43213/results/findings.md`
+2. `artifacts/runs/high-rigor/20260305T002116Z-6ae43213/results/runs_long.csv`
+3. `artifacts/runs/high-rigor/20260305T002116Z-6ae43213/results/cell_stats.csv`
+4. `artifacts/runs/high-rigor/20260305T002116Z-6ae43213/results/method_aggregate.csv`
+5. `experiments/config/high_rigor.yaml`
