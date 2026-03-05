@@ -10,4 +10,8 @@ __all__ = [
     "stats",
     "plots",
     "findings",
+    "pairwise",
+    "run_eval_only",
+    "sensitivity",
+    "lr_proxy_breakdown",
 ]

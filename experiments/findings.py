@@ -149,10 +149,17 @@ def generate_findings(results_dir: str | Path, figdir: str | Path, allow_legacy_
         "analysis_manifest_json": str(analysis_manifest_path),
         "cell_stats_csv": str(cell_stats_path),
         "method_aggregate_csv": str(method_agg_path),
-        "figure_method_delta": str(fig_path / "method_median_delta_bar.png"),
-        "figure_method_win_rate": str(fig_path / "method_win_rate_bar.png"),
-        "figure_method_q_count": str(fig_path / "method_q_lt_005_count_bar.png"),
     }
+    figure_map = {
+        "figure_method_delta": fig_path / "method_median_delta_bar.png",
+        "figure_method_win_rate": fig_path / "method_win_rate_bar.png",
+        "figure_method_q_count": fig_path / "method_q_lt_005_count_bar.png",
+    }
+    for key, path in figure_map.items():
+        if path.is_file():
+            artifacts[key] = str(path)
+        else:
+            warnings.append(f"Optional figure artifact missing for this run mode: {path}")
 
     findings_payload = {
         "run_id": run_id,

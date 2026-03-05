@@ -3,7 +3,7 @@
 ## Abstract
 This note evaluates whether a phase-aware damping rule at the Gaussian curvature boundary ($r = \sigma$) is associated with better outcomes under noisy conditions. The evidence base now includes both a historical report-derived table and a new rerun pipeline with stricter statistical controls.
 
-This revision addresses prior methodological concerns by using sign-robust effect metrics, two-sided paired tests, and multiple-comparison correction in the rerun analysis. Under the high-rigor rerun, `phasewall_tuned` is near-neutral in aggregate (2/36 cells with `q < 0.05`), while `lr_adapt_proxy` and `phasewall_plus_lr_tuned` show the strongest aggregate signals (34/36 and 33/36 cells with `q < 0.05`). The combined variant's gains are not cleanly decomposed into LR-proxy-only versus incremental PhaseWall contribution in this study.
+This revision addresses prior methodological concerns by using sign-robust effect metrics, two-sided paired tests, and multiple-comparison correction in the rerun analysis. Under the high-rigor rerun, `phasewall_tuned` is near-neutral in aggregate (2/36 cells with `q < 0.05`), while `lr_adapt_proxy` and `phasewall_plus_lr_tuned` show the strongest aggregate signals (34/36 and 33/36 cells with `q < 0.05`). A dedicated eval-only additive ablation (`lr_adapt_proxy` vs `phasewall_plus_lr_tuned` with fixed `s=0.1`) found 0/36 cells with pairwise BH-FDR `q < 0.05`, supporting closure of the standalone PhaseWall question under this protocol and pivoting primary interest to `lr_adapt_proxy`.
 
 DOI status for this standalone repository release line:
 - Version DOI (`v0.2.0`): `10.5281/zenodo.18856931`
@@ -99,10 +99,22 @@ Interpretation:
 - `phasewall_tuned` is near-neutral-to-slightly-better in aggregate (`median_of_cell_median_delta = -0.078369`) and mixed across cells (21/36 cells with negative median delta).
 - `lr_adapt_proxy` is the dominant observed driver in this matrix (`median_of_cell_median_delta = -18.872089`, 34/36 cells with `q < 0.05`).
 - `phasewall_plus_lr_tuned` performs similarly to `lr_adapt_proxy` in aggregate under this protocol (33/36 cells with `q < 0.05`).
-- Current evidence does not isolate an incremental PhaseWall benefit when added on top of LR-proxy.
 - `pop4x` degrades strongly relative to vanilla in this fixed-budget setting.
 
-This pattern supports a nuanced exploratory conclusion: PhaseWall-only evidence is weak in this run, while LR-proxy-containing variants carry the strongest aggregate signals.
+### 4.1 Additive Ablation (PW+LR vs LR)
+To close the open decomposition question, we ran an eval-only additive ablation using fixed LR-proxy parameters and fixed `s = 0.1`:
+- Run ID: `20260305T014110Z-321d79b1`
+- Methods compared pairwise: `lr_adapt_proxy` (A) vs `phasewall_plus_lr_tuned` (B)
+- Matrix and seeds: same 36-cell matrix, same 100 evaluation seeds, no tuning stage.
+
+Pairwise result summary (`B - A`):
+- Cells where B is better (negative median delta): `17/36`
+- Cells where A is better (positive median delta): `19/36`
+- Cells with uncorrected `p < 0.05`: `1/36`
+- Cells with BH-FDR `q < 0.05`: `0/36`
+- Median of cell medians (`B - A`): `0.002016829`
+
+This ablation supports a practical closure statement for this note: adding PhaseWall on top of the LR proxy does not yield an isolable corrected-significant gain under the current protocol.
 
 ## 5. Reproducibility and Integrity Checks
 Primary command used for this run:
@@ -118,6 +130,9 @@ Key machine-auditable artifacts for this run:
 - `artifacts/runs/high-rigor/20260305T002116Z-6ae43213/results/runs_long.csv`
 - `artifacts/runs/high-rigor/20260305T002116Z-6ae43213/results/cell_stats.csv`
 - `artifacts/runs/high-rigor/20260305T002116Z-6ae43213/results/method_aggregate.csv`
+- `artifacts/runs/high-rigor/20260305T002116Z-6ae43213/results/pairwise_pwlr_vs_lr.csv`
+- `artifacts/runs/high-rigor/20260305T002116Z-6ae43213/results/pairwise_pwlr_vs_lr.json`
+- `artifacts/runs/high-rigor/20260305T002116Z-6ae43213/results/findings_ablation.md`
 - `artifacts/runs/high-rigor/20260305T002116Z-6ae43213/results/manifest.json`
 - `artifacts/runs/high-rigor/20260305T002116Z-6ae43213/results/analysis_manifest.json`
 - `artifacts/runs/high-rigor/20260305T002116Z-6ae43213/results/findings.json`
@@ -129,7 +144,26 @@ Artifact verification command:
 python3 scripts/verify_rerun_artifacts.py \
   --results-dir artifacts/runs/high-rigor/20260305T002116Z-6ae43213/results \
   --figdir artifacts/runs/high-rigor/20260305T002116Z-6ae43213/figures \
-  --config experiments/config/high_rigor.yaml
+  --config experiments/config/high_rigor.yaml \
+  --mode full \
+  --require-pairwise
+```
+
+Eval-only additive ablation command:
+
+```bash
+bash scripts/run_phasewall_ablation_pipeline.sh --workers 8
+```
+
+Ablation verification command:
+
+```bash
+python3 scripts/verify_rerun_artifacts.py \
+  --results-dir artifacts/runs/phasewall-ablation/20260305T014110Z-321d79b1/results \
+  --figdir artifacts/runs/phasewall-ablation/20260305T014110Z-321d79b1/figures \
+  --config experiments/config/ablation_pwlr_vs_lr.yaml \
+  --mode eval_only \
+  --require-pairwise
 ```
 
 ## 6. Limitations
@@ -137,10 +171,11 @@ python3 scripts/verify_rerun_artifacts.py \
 - Results are from one run configuration and should not be interpreted as universal across all possible settings.
 - Tune/eval separation is enforced by disjoint seeds and task subset, but broader external validation is still needed.
 - The tuning subset overlaps evaluation function families and one evaluation noise level (`sigma_noise = 0.1`), so some task-level leakage risk remains despite seed disjointness.
+- Additive ablation in this note fixes PhaseWall at `s=0.1`; broader ablations over alternative coupling designs may still be explored separately.
 - The geometric argument motivates the damping rule but does not by itself prove causal optimality on arbitrary objective families.
 
 ## 7. Conclusion
-The curvature-sign claim at $r = \sigma$ remains mathematically exact (Appendix A). Under the new high-rigor rerun protocol with stronger statistical controls, the empirical picture is mixed but clearer: `phasewall_tuned` is near-neutral in aggregate, and the strongest aggregate signals are carried by `lr_adapt_proxy` and `phasewall_plus_lr_tuned`. Because the combined variant includes the LR proxy and this study does not provide ablation-level decomposition, incremental PhaseWall contribution on top of LR-proxy is not resolved here. These results support continued exploratory investigation, not a universal performance claim.
+The curvature-sign claim at $r = \sigma$ remains mathematically exact (Appendix A). Empirically, under the high-rigor rerun protocol plus dedicated eval-only additive ablation, standalone PhaseWall evidence is weak and no corrected-significant incremental benefit is observed when adding PhaseWall to the LR-proxy variant (`0/36` pairwise cells with `q < 0.05`). The strongest reproducible signal in this repository now centers on `lr_adapt_proxy`. This note therefore closes the current standalone PhaseWall question under this protocol and treats LR-proxy characterization as the primary follow-on investigation direction. These are still scoped, non-universal claims.
 
 ## Appendix A: Curvature Sign Derivation for the Gaussian Hill
 Let
@@ -187,4 +222,8 @@ Therefore, the curvature sign change occurs exactly at $r = \sigma$.
 2. `artifacts/runs/high-rigor/20260305T002116Z-6ae43213/results/runs_long.csv`
 3. `artifacts/runs/high-rigor/20260305T002116Z-6ae43213/results/cell_stats.csv`
 4. `artifacts/runs/high-rigor/20260305T002116Z-6ae43213/results/method_aggregate.csv`
-5. `experiments/config/high_rigor.yaml`
+5. `artifacts/runs/high-rigor/20260305T002116Z-6ae43213/results/pairwise_pwlr_vs_lr.csv`
+6. `artifacts/runs/phasewall-ablation/20260305T014110Z-321d79b1/results/pairwise_pwlr_vs_lr.csv`
+7. `docs/analysis/lr_adapt_proxy_mechanism.md`
+8. `docs/analysis/lr_adapt_proxy_breakdown.md`
+9. `experiments/config/high_rigor.yaml`
