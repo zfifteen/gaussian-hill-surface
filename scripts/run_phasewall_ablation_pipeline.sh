@@ -4,32 +4,32 @@ set -euo pipefail
 REPO_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
-CONFIG_PATH="experiments/config/high_rigor.yaml"
+CONFIG_PATH="experiments/config/ablation_pwlr_vs_lr.yaml"
 RUN_ID="${RUN_ID:-}"
 
 if [[ -z "$RUN_ID" ]]; then
   RUN_ID="$(python3 - <<'PY'
 import yaml
 from experiments.io import make_run_id, stable_config_hash
-with open('experiments/config/high_rigor.yaml', 'r', encoding='utf-8') as fh:
+with open('experiments/config/ablation_pwlr_vs_lr.yaml', 'r', encoding='utf-8') as fh:
     config = yaml.safe_load(fh)
 print(make_run_id(stable_config_hash(config)))
 PY
 )"
 fi
 
-RUN_ROOT="artifacts/runs/high-rigor/${RUN_ID}"
+RUN_ROOT="artifacts/runs/phasewall-ablation/${RUN_ID}"
 RESULTS_DIR="${RUN_ROOT}/results"
 FIG_DIR="${RUN_ROOT}/figures"
 
 if [[ -e "$RUN_ROOT" ]]; then
-  echo "[high-rigor] ERROR: run root already exists: $RUN_ROOT" >&2
+  echo "[phasewall-ablation] ERROR: run root already exists: $RUN_ROOT" >&2
   exit 1
 fi
 
 mkdir -p "$RESULTS_DIR" "$FIG_DIR"
 
-python3 -m experiments.run \
+python3 -m experiments.run_eval_only \
   --config "$CONFIG_PATH" \
   --outdir "$RESULTS_DIR" \
   --run-id "$RUN_ID" \
@@ -60,8 +60,8 @@ python3 scripts/verify_rerun_artifacts.py \
   --results-dir "$RESULTS_DIR" \
   --figdir "$FIG_DIR" \
   --config "$CONFIG_PATH" \
-  --mode full \
+  --mode eval_only \
   --require-pairwise
 
-echo "[high-rigor] run_id=$RUN_ID"
-echo "[high-rigor] run_root=$RUN_ROOT"
+echo "[phasewall-ablation] run_id=$RUN_ID"
+echo "[phasewall-ablation] run_root=$RUN_ROOT"
