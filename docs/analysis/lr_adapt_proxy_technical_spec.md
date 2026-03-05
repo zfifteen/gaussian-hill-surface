@@ -1,5 +1,14 @@
 # `lr_adapt_proxy` Technical Specification (Canonical)
 
+## Reader Overview
+This project studies black-box optimization under noisy benchmark conditions, where an optimizer must improve objective values even when individual evaluations can be misleading. In this setting, CMA-ES can be viewed as an iterative search procedure: each generation proposes a batch of candidate solutions, evaluates them, and updates its internal search behavior based on the observed outcomes.
+
+One key control variable in CMA-ES is step size (`sigma`), which governs how far new candidates are sampled from the current search center. Larger `sigma` favors broader exploration, while smaller `sigma` favors local refinement. In noisy settings, deciding when to expand or contract this sampling radius can be difficult, because apparent progress can be either real signal or random fluctuation.
+
+`lr_adapt_proxy` was introduced in this repository as a practical, repository-local control layer that adjusts `sigma` using observed progress relative to observed noise. At a high level, each generation computes a progress-to-noise ratio (SNR: signal-to-noise ratio), smooths that value over time with EMA (exponential moving average), and then nudges `sigma` up or down within configured bounds. This is intended to make step-size behavior more responsive to empirical search conditions without replacing the optimizer's core update loop.
+
+This algorithm is intentionally labeled a proxy: it is not presented as an exact reproduction of external LR-Adapt algorithms, and it augments pycma behavior rather than replacing covariance adaptation internals. The remainder of this document formalizes the update rule, maps each step to source code, and summarizes run-backed evidence.
+
 ## 1. Scope and Claim Boundaries
 This document is the canonical technical specification for the repository-local `lr_adapt_proxy` algorithm used in this project’s pycma benchmark pipeline.
 
@@ -252,4 +261,3 @@ Open questions:
 - Which proxy components drive gains most strongly (threshold band vs clamp window vs factors)?
 - How does proxy behavior transfer beyond current function families and budget regime?
 - What additional diagnostics should be logged for generation-level causal analysis (not just final generation snapshots)?
-
