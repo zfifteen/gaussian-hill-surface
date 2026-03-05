@@ -9,6 +9,12 @@ One key control variable in CMA-ES is step size (`sigma`), which governs how far
 
 This algorithm is intentionally labeled a proxy: it is not presented as an exact reproduction of external LR-Adapt algorithms, and it augments pycma behavior rather than replacing covariance adaptation internals. The remainder of this document formalizes the update rule, maps each step to source code, and summarizes run-backed evidence.
 
+In terms of derivation, the starting point was not “invent a brand-new optimizer,” but “add a clearer noise-aware control loop around step size.” Existing CMA-ES practice already contains the core intuition that step size should respond to search conditions. The design work here was to choose a compact, testable signal pathway that engineering could audit easily: use observed generation-level improvement as signal, use robust within-generation spread as noise, smooth over time, then apply bounded sigma adjustments.
+
+The inspiration therefore came from established adaptation themes (progress-aware and noise-aware step-size control), while customization began at the concrete implementation choices. The repository implementation uses a MAD-based noise estimate, an EMA-smoothed SNR proxy, threshold-triggered multiplicative scaling, and explicit min/max sigma clamps tied to initial sigma. That specific combination, plus the post-`tell` integration point and diagnostics payload, is the local design contribution in this codebase.
+
+Generalization is plausible because the mechanism depends on information that most evolutionary-search loops already expose: per-generation fitness values, current step size, and running best objective. You do not need project-specific geometry features or domain-specific gradients. In practice, generalization still has two layers: technical portability (easy to port the rule) and empirical portability (whether it helps across different tasks, budgets, noise models, and ES implementations). This document makes a scoped claim on the first and treats the second as an explicit validation question.
+
 ## 1. Scope and Claim Boundaries
 This document is the canonical technical specification for the repository-local `lr_adapt_proxy` algorithm used in this project’s pycma benchmark pipeline.
 
